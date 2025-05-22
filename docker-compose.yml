@@ -1,0 +1,82 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: email-app
+    volumes:
+      - ./:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - email-net
+    depends_on:
+      - mysql
+      - redis
+      - rabbitmq
+
+  nginx:
+    image: nginx:alpine
+    container_name: email-nginx
+    ports:
+      - "8000:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx:/etc/nginx/conf.d
+    networks:
+      - email-net
+    depends_on:
+      - app
+
+  mysql:
+    image: mysql:8.0
+    container_name: email-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: email_dispatcher
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: secret
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - email-net
+
+  redis:
+    image: redis:alpine
+    container_name: email-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - email-net
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: email-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: secret
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - email-net
+
+  node:
+    image: node:18-alpine
+    container_name: email-node
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    ports:
+      - "5173:5173" 
+    networks:
+      - email-net
+    command: tail -f /dev/null
+
+volumes:
+  mysql_data:
+
+networks:
+  email-net:
+    driver: bridge

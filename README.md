@@ -1,66 +1,171 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+```markdown
+# 📧 Email Dispatcher
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistema web para gerenciamento e disparo de emails em massa, desenvolvido com Laravel e Vue.js.
 
-## About Laravel
+## 🚀 Tecnologias Utilizadas
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### Backend
+- **Laravel 11** - Framework PHP
+- **MySQL** - Banco de dados
+- **Redis** - Cache e sessões
+- **RabbitMQ** - Fila de processamento
+- **Laravel Sanctum** - Autenticação API
+- **Docker** - Containerização
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Frontend
+- **Vue.js 3** - Framework JavaScript
+- **Pinia** - Gerenciamento de estado
+- **Vue Router** - Roteamento
+- **PrimeVue** - Biblioteca de componentes UI
+- **Tailwind CSS** - Framework CSS
+- **Axios** - Cliente HTTP
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Outros
+- **Mailtrap** - Teste de emails
+- **Vite** - Build tool
 
-## Learning Laravel
+## 📋 Pré-requisitos
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- Docker e Docker Compose
+- Node.js 18+ (para desenvolvimento local)
+- Conta no Mailtrap para testes de email
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## 🛠️ Instalação
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 1. Clone o repositório
+```bash
+git clone https://github.com/KaioJAS/email-dispatcher.git
+cd email-dispatcher
+```
 
-## Laravel Sponsors
+### 4. Inicie os containers
+```bash
+docker compose up -d --build
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 6. Instale as dependências do Frontend
+```bash
+docker compose exec node npm install
 
-### Premium Partners
+### 7. Configure o ambiente
+```bash
+cp .env.example .env
+docker compose exec app php artisan key:generate
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+### 8. Configure o arquivo .env
+```env
+# Database
+DB_CONNECTION=mysql
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE=email_dispatcher
+DB_USERNAME=laravel
+DB_PASSWORD=secret
 
-## Contributing
+# Queue
+QUEUE_CONNECTION=rabbitmq
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+# Cache/Session
+CACHE_STORE=redis
+SESSION_DRIVER=redis
+REDIS_HOST=redis
 
-## Code of Conduct
+# Email (Mailtrap)
+MAIL_MAILER=smtp
+MAIL_HOST=sandbox.smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=seu_username_mailtrap
+MAIL_PASSWORD=sua_senha_mailtrap
+MAIL_ENCRYPTION=tls
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# RabbitMQ
+RABBITMQ_HOST=rabbitmq
+RABBITMQ_PORT=5672
+RABBITMQ_USER=admin
+RABBITMQ_PASSWORD=secret
+RABBITMQ_VHOST=email_vhost
+```
 
-## Security Vulnerabilities
+### 9. Execute as migrações e seeders
+```bash
+docker compose exec app php artisan migrate
+docker compose exec app php artisan db:seed
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 10. Configure o RabbitMQ
+```bash
+docker compose exec rabbitmq rabbitmqctl add_vhost email_vhost
+docker compose exec rabbitmq rabbitmqctl set_permissions -p email_vhost admin ".*" ".*" ".*"
+```
 
-## License
+### 11. Inicie os serviços
+```bash
+# Frontend
+docker compose exec node npm run dev
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# Queue Worker
+docker compose exec app php artisan queue:work rabbitmq --verbose &
+```
+
+## 🎯 Como Usar
+
+### Acesso ao Sistema
+1. Acesse: `http://localhost:8000`
+2. Faça login com as credenciais:
+   - **Email:** admin@test.com
+   - **Senha:** 123456
+
+### Dashboard
+- Visualize estatísticas de emails enviados, pendentes e com erro
+- Acompanhe gráficos de envios por dia
+- Monitore métricas
+
+### Gerenciamento de Emails
+1. Navegue para "Controle de Emails"
+2. Clique em "Criar novo disparo"
+3. Preencha:
+   - Título do email
+   - Email do remetente
+   - Destinatários (separados por vírgula)
+   - Conteúdo (com editor rico)
+4. Clique em "Criar agora"
+5. Acompanhe o status na listagem
+
+## ✨ Funcionalidades
+
+- ✅ **Autenticação Segura** - Login com tokens Bearer
+- ✅ **Dashboard Interativo** - Estatísticas e gráficos
+- ✅ **Editor Rico** - Interface WYSIWYG para criação de emails
+- ✅ **Processamento em Fila** - RabbitMQ para envios assíncronos
+- ✅ **Interface Responsiva** - Design adaptável para mobile/desktop
+- ✅ **Paginação Inteligente** - Listagem otimizada de emails
+- ✅ **Validação Robusta** - Validação de formulários e dados
+- ✅ **Status em Tempo Real** - Acompanhamento do status dos envios
+
+## 🔧 Comandos Úteis
+
+### Development
+```bash
+# Executar testes
+docker compose exec app php artisan test
+
+# Limpar cache
+docker compose exec app php artisan config:clear
+docker compose exec app php artisan cache:clear
+
+# Ver logs
+docker compose exec app tail -f storage/logs/laravel.log
+
+# Monitorar fila
+docker compose exec app php artisan queue:monitor
+
+# Build frontend
+docker compose exec node npm run build
+```
+
+## 👨‍💻 Desenvolvedor
+
+Desenvolvido com ❤️ para demonstração de habilidades Full Stack com Laravel e Vue.js.
+```
